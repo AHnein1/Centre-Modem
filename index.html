@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Observatoire Politique du Mouvement Démocrate (MoDem)</title>
+  <meta name="description" content="Plateforme d'analyse politique, historique et électorale sur le Mouvement Démocrate (MoDem).">
+  
+  <!-- Polices Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;800&family=Fira+Code:wght@400;600&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  
+  <!-- Library Chart.js pour les graphiques électoraux -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <style>
+    /* ==========================================================================
+       VARIABLES CSS & THÈMES DE L'OBSERVATOIRE
+       ========================================================================== */
+    :root {
+      /* Palette 'L'Observatoire Politique Européen' */
+      --bg-midnight: #101C2C;
+      --bg-deep-blue: #1D3557;
+      --bg-card: rgba(29, 53, 87, 0.4);
+      --bg-card-hover: rgba(29, 53, 87, 0.6);
+      --text-ivory: #F5F1E8;
+      --text-muted: #A0AAB8;
+      --accent-gold: #C6A66B;
+      --accent-gold-light: #E5C992;
+      --slate-grey: #788391;
+      --border-color: rgba(198, 166, 107, 0.25);
+      --border-color-soft: rgba(255, 255, 255, 0.08);
+      --shadow-main: 0 12px 32px rgba(0, 0, 0, 0.35);
+      --font-title: 'Cinzel', serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+      --transition-fast: 0.25s ease;
+      --transition-smooth: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      --radius-sm: 6px;
+      --radius-md: 12px;
+      --radius-lg: 20px;
+    }
+
+    [data-theme="light"] {
+      --bg-midnight: #F5F1E8;
+      --bg-deep-blue: #FFFFFF;
+      --bg-card: rgba(255, 255, 255, 0.85);
+      --bg-card-hover: #FFFFFF;
+      --text-ivory: #101C2C;
+      --text-muted: #526071;
+      --accent-gold: #9E7D3B;
+      --accent-gold-light: #C6A66B;
+      --slate-grey: #606C7A;
+      --border-color: rgba(158, 125, 59, 0.3);
+      --border-color-soft: rgba(0, 0, 0, 0.08);
+      --shadow-main: 0 8px 24px rgba(16, 28, 44, 0.08);
+    }
+
+    /* Reset CSS de base */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      font-size: 16px;
+    }
+
+    body {
+      background-color: var(--bg-midnight);
+      color: var(--text-ivory);
+      font-family: var(--font-body);
+      line-height: 1.65;
+      overflow-x: hidden;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    a {
+      color: var(--accent-gold);
+      text-decoration: none;
+      transition: color var(--transition-fast);
+    }
+
+    a:hover {
+      color: var(--accent-gold-light);
+    }
+
+    /* Conteneur principal */
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    /* En-tête / Navigation */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(16, 28, 44, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      transition: background 0.3s ease;
+    }
+
+    [data-theme="light"] .header {
+      background: rgba(245, 241, 232, 0.92);
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 80px;
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-logo-icon {
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, var(--accent-gold), var(--bg-deep-blue));
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-title);
+      font-weight: 800;
+      color: #FFF;
+      font-size: 1.1rem;
+      border: 1px solid var(--accent-gold);
+    }
+
+    .brand-title {
+      font-family: var(--font-title);
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: var(--text-ivory);
+      text-transform: uppercase;
+    }
+
+    .brand-subtitle {
+      font-size: 0.7rem;
+      color: var(--accent-gold);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      display: block;
+    }
+
+    /* Navigation Menu */
+    .nav-menu {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      list-style: none;
+    }
+
+    .nav-link {
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      padding: 0.5rem 0.25rem;
+      position: relative;
+      transition: color var(--transition-fast);
+    }
+
+    .nav-link:hover, .nav-link.active {
+      color: var(--accent-gold);
+    }
+
+    .nav-link.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background-color: var(--accent-gold);
+    }
+
+    /* Contrôles d'en-tête */
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .search-box {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-input {
+      background: var(--bg-deep-blue);
+      border: 1px solid var(--border-color);
+      border-radius: 30px;
+      padding: 0.45rem 1rem 0.45rem 2.2rem;
+      color: var(--text-ivory);
+      font-size: 0.85rem;
+      width: 180px;
+      transition: width var(--transition-smooth), border-color var(--transition-fast);
+    }
+
+    .search-input:focus {
+      outline: none;
+      width: 240px;
+      border-color: var(--accent-gold);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 0.8rem;
+      width: 14px;
+      height: 14px;
+      fill: var(--text-muted);
+    }
+
+    .btn-theme {
+      background: var(--bg-deep-blue);
+      border: 1px solid var(--border-color);
+      color: var(--text-ivory);
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background var(--transition-fast), border-color var(--transition-fast);
+    }
+
+    .btn-theme:hover {
+      border-color: var(--accent-gold);
+    }
+
+    /* Hero Section */
+    .hero {
+      position: relative;
+      padding: 6rem 0 4rem;
+      background: radial-gradient(circle at 70% 30%, rgba(29, 53, 87, 0.6) 0%, rgba(16, 28, 44, 0.95) 70%);
+      border-bottom: 1px solid var(--border-color-soft);
+      overflow: hidden;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 3rem;
+      align-items: center;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 0.9rem;
+      background: rgba(198, 166, 107, 0.12);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      color: var(--accent-gold);
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-title {
+      font-family: var(--font-title);
+      font-size: 3.2rem;
+      line-height: 1.15;
+      font-weight: 800;
+      margin-bottom: 1rem;
+      color: var(--text-ivory);
+    }
+
+    .hero-subtitle {
+      font-size: 1.25rem;
+      color: var(--accent-gold);
+      font-weight: 400;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-description {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      margin-bottom: 2rem;
+      max-width: 620px;
+    }
+
+    .hero-cta {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.8rem 1.6rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      border: 1px solid transparent;
+    }
+
+    .btn-primary {
+      background: var(--accent-gold);
+      color: #101C2C;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-gold-light);
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: rgba(29, 53, 87, 0.5);
+      border-color: var(--border-color);
+      color: var(--text-ivory);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-deep-blue);
+      border-color: var(--accent-gold);
+      transform: translateY(-2px);
+    }
+
+    .hero-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 2rem;
+      box-shadow: var(--shadow-main);
+      backdrop-filter: blur(8px);
+    }
+
+    .stat-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+    }
+
+    .stat-item {
+      border-left: 2px solid var(--accent-gold);
+      padding-left: 1rem;
+    }
+
+    .stat-value {
+      font-family: var(--font-mono);
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--accent-gold);
+      line-height: 1;
+      margin-bottom: 0.3rem;
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Sections générales */
+    .section {
+      padding: 5rem 0;
+      border-bottom: 1px solid var(--border-color-soft);
+    }
+
+    .section-header {
+      margin-bottom: 3rem;
+      text-align: left;
+    }
+
+    .section-tag {
+      color: var(--accent-gold);
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    .section-title {
+      font-family: var(--font-title);
+      font-size: 2.2rem;
+      color: var(--text-ivory);
+      font-weight: 700;
+    }
+
+    .section-lead {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      margin-top: 0.75rem;
+      max-width: 800px;
+    }
+
+    /* Section Identité */
+    .identity-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 2rem;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color-soft);
+      border-radius: var(--radius-md);
+      padding: 2rem;
+      transition: transform var(--transition-fast), border-color var(--transition-fast);
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: var(--border-color);
+    }
+
+    .card-icon {
+      width: 42px;
+      height: 42px;
+      background: rgba(198, 166, 107, 0.15);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-gold);
+      margin-bottom: 1.25rem;
+    }
+
+    .card-title {
+      font-family: var(--font-title);
+      font-size: 1.3rem;
+      margin-bottom: 0.75rem;
+      color: var(--text-ivory);
+    }
+
+    .card-text {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    /* Section Chronologie */
+    .timeline {
+      position: relative;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: 2px;
+      background: var(--border-color);
+      transform: translateX(-50%);
+    }
+
+    .timeline-item {
+      position: relative;
+      margin-bottom: 3rem;
+      width: 50%;
+      padding: 0 2.5rem;
+    }
+
+    .timeline-item:nth-child(odd) {
+      left: 0;
+      text-align: right;
+    }
+
+    .timeline-item:nth-child(even) {
+      left: 50%;
+      text-align: left;
+    }
+
+    .timeline-dot {
+      position: absolute;
+      top: 0;
+      width: 16px;
+      height: 16px;
+      background: var(--accent-gold);
+      border: 3px solid var(--bg-midnight);
+      border-radius: 50%;
+      z-index: 10;
+    }
+
+    .timeline-item:nth-child(odd) .timeline-dot {
+      right: -8px;
+    }
+
+    .timeline-item:nth-child(even) .timeline-dot {
+      left: -8px;
+    }
+
+    .timeline-content {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color-soft);
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+    }
+
+    .timeline-date {
+      font-family: var(--font-mono);
+      color: var(--accent-gold);
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .timeline-title {
+      font-family: var(--font-title);
+      font-size: 1.15rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .timeline-desc {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    /* Section Graphiques & Élections */
+    .chart-container-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 2rem;
+      margin-top: 2rem;
+    }
+
+    .chart-controls {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .filter-btn-group {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .filter-btn {
+      background: var(--bg-deep-blue);
+      border: 1px solid var(--border-color-soft);
+      color: var(--text-muted);
+      padding: 0.4rem 0.9rem;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .filter-btn.active, .filter-btn:hover {
+      background: var(--accent-gold);
+      color: #101C2C;
+      border-color: var(--accent-gold);
+    }
+
+    .chart-wrapper {
+      position: relative;
+      height: 380px;
+      width: 100%;
+    }
+
+    /* Section Personnalités */
+    .persons-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 2rem;
+    }
+
+    .person-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color-soft);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      transition: all var(--transition-fast);
+    }
+
+    .person-card:hover {
+      border-color: var(--accent-gold);
+      transform: translateY(-50px);
+    }
+
+    .person-img-wrapper {
+      height: 240px;
+      background: var(--bg-deep-blue);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .person-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: grayscale(20%);
+      transition: filter var(--transition-fast);
+    }
+
+    .person-card:hover .person-img {
+      filter: grayscale(0%);
+    }
+
+    .person-avatar-placeholder {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: var(--bg-midnight);
+      border: 2px solid var(--accent-gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-title);
+      font-size: 1.8rem;
+      color: var(--accent-gold);
+    }
+
+    .person-info {
+      padding: 1.5rem;
+    }
+
+    .person-name {
+      font-family: var(--font-title);
+      font-size: 1.25rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .person-role {
+      color: var(--accent-gold);
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 0.8rem;
+    }
+
+    .person-bio {
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      margin-bottom: 1rem;
+    }
+
+    /* Section Scénarios 2027 */
+    .scenarios-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+    }
+
+    .scenario-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 2rem;
+      position: relative;
+    }
+
+    .scenario-num {
+      font-family: var(--font-mono);
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: rgba(198, 166, 107, 0.2);
+      position: absolute;
+      top: 1rem;
+      right: 1.5rem;
+    }
+
+    .scenario-title {
+      font-family: var(--font-title);
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      color: var(--accent-gold);
+    }
+
+    /* Footer */
+    .footer {
+      background: rgba(10, 18, 28, 0.95);
+      border-top: 1px solid var(--border-color);
+      padding: 4rem 0 2rem;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 3rem;
+      margin-bottom: 3rem;
+    }
+
+    .footer-bottom {
+      border-top: 1px solid var(--border-color-soft);
+      padding-top: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+      .hero-grid, .scenarios-grid, .footer-grid {
+        grid-template-columns: 1fr;
+      }
+      .timeline::before {
+        left: 20px;
+      }
+      .timeline-item {
+        width: 100%;
+        padding-left: 3rem;
+        padding-right: 0;
+        text-align: left !important;
+      }
+      .timeline-item:nth-child(even) {
+        left: 0;
+      }
+      .timeline-item:nth-child(odd) .timeline-dot,
+      .timeline-item:nth-child(even) .timeline-dot {
+        left: 12px;
+      }
+      .nav-menu {
+        display: none; /* Menu mobile simplifié */
+      }
+    }
+
+    /* Style d'impression */
+    @media print {
+      .header, .hero-cta, .btn, .chart-controls, .btn-theme {
+        display: none !important;
+      }
+      body {
+        background: #FFF !important;
+        color: #000 !important;
+      }
+      .card, .chart-container-box, .person-card {
+        border: 1px solid #CCC !important;
+        background: #FFF !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- EN-TÊTE ET NAVIGATION -->
+  <header class="header">
+    <div class="container header-inner">
+      <div class="brand-logo">
+        <div class="brand-logo-icon">Mo</div>
+        <div>
+          <span class="brand-title">Observatoire</span>
+          <span class="brand-subtitle">Mouvement Démocrate</span>
+        </div>
+      </div>
+
+      <nav>
+        <ul class="nav-menu">
+          <li><a href="#apercu" class="nav-link active">Vue d'ensemble</a></li>
+          <li><a href="#histoire" class="nav-link">Histoire</a></li>
+          <li><a href="#ideologie" class="nav-link">Idéologie</a></li>
+          <li><a href="#elections" class="nav-link">Élections</a></li>
+          <li><a href="#personnalites" class="nav-link">Personnalités</a></li>
+          <li><a href="#presidentielle2027" class="nav-link">2027</a></li>
+          <li><a href="#sources" class="nav-link">Sources</a></li>
+        </ul>
+      </nav>
+
+      <div class="header-controls">
+        <div class="search-box">
+          <svg class="search-icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+          <input type="text" id="searchInput" class="search-input" placeholder="Rechercher..." onkeyup="filterSearch()">
+        </div>
+        <button class="btn-theme" id="themeToggle" onclick="toggleTheme()" title="Changer le thème">
+          🌙
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- SECTION HERO / VUE D'ENSEMBLE -->
+  <section id="apercu" class="hero">
+    <div class="container hero-grid">
+      <div>
+        <div class="hero-badge">Analyse Institutionnelle & Politique</div>
+        <h1 class="hero-title">Mouvement Démocrate</h1>
+        <div class="hero-subtitle">Comprendre le centre politique français & européen</div>
+        <p class="hero-description">
+          Fondé en 2007 par François Bayrou dans le sillage de l'UDF, le MoDem incarne la tradition centriste, démocrate-chrétienne et européenne en France. Un pivot stratégique majeur au cœur des coalitions gouvernementales.
+        </p>
+        <div class="hero-cta">
+          <a href="#histoire" class="btn btn-primary">Explorer l'histoire</a>
+          <a href="#elections" class="btn btn-secondary">Analyser les élections</a>
+        </div>
+      </div>
+
+      <div class="hero-card">
+        <h3 style="font-family: var(--font-title); margin-bottom: 1.5rem; color: var(--accent-gold);">Repères Clés</h3>
+        <div class="stat-list">
+          <div class="stat-item">
+            <div class="stat-value">2007</div>
+            <div class="stat-label">Création officielle</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">33</div>
+            <div class="stat-label">Députés à l'AN</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">18.57%</div>
+            <div class="stat-label">Score record 2007</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">EDP</div>
+            <div class="stat-label">Parti Européen</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION IDENTITÉ ET PRINCIPES -->
+  <section id="ideologie" class="section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">01. Positionnement & Valeurs</span>
+        <h2 class="section-title">Identité & Socle Idéologique</h2>
+        <p class="section-lead">Le Mouvement Démocrate se situe au centre de l'échiquier politique français, promouvant la démocratie sociale, l'écologie pragmatique et le fédéralisme européen.</p>
+      </div>
+
+      <div class="identity-grid">
+        <div class="card">
+          <div class="card-icon">🇪🇺</div>
+          <h3 class="card-title">Pro-Européanisme Convaincu</h3>
+          <p class="card-text">Pilier historique du parti, l'engagement pour la construction européenne vise une intégration fédérale renforcée, une souveraineté industrielle et la défense des valeurs démocratiques du continent.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">⚖️</div>
+          <h3 class="card-title">Moralisation & Institutions</h3>
+          <p class="card-text">Priorité constante accordée à la transparence publique, à la réforme du scrutin (introduction de la proportionnelle) et au renouvellement des pratiques démocratiques.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">🤝</div>
+          <h3 class="card-title">Culture de Coalition</h3>
+          <p class="card-text">Pionnier de la culture du compromis à l'européenne en France, le MoDem prône des alliances transpartisanes stables tout en maintenant son indépendance critique.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION HISTOIRE ET CHRONOLOGIE -->
+  <section id="histoire" class="section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">02. Trajectoire Historique</span>
+        <h2 class="section-title">Chronologie des Événements Marquants</h2>
+        <p class="section-lead">De la rupture de 2007 à l'exercice du pouvoir exécutif et aux préparatifs de 2027.</p>
+      </div>
+
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <div class="timeline-date">Mai 2007</div>
+            <h3 class="timeline-title">Fondation du MoDem</h3>
+            <p class="timeline-desc">Après avoir obtenu 18,57 % à la présidentielle, François Bayrou transforme l'UDF en Mouvement Démocrate pour ancrer un centre libre de tout alignement automatique.</p>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <div class="timeline-date">Février 2017</div>
+            <h3 class="timeline-title">L'Alliance Stratégique</h3>
+            <p class="timeline-desc">François Bayrou propose une alliance d'alternative à Emmanuel Macron, posant les bases de la majorité présidentielle 'En Ensemble'.</p>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <div class="timeline-date">Décembre 2024</div>
+            <h3 class="timeline-title">François Bayrou à Matignon</h3>
+            <p class="timeline-desc">François Bayrou est nommé Premier ministre par le Président Emmanuel Macron pour conduire un gouvernement de rassemblement républicain.</p>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <div class="timeline-date">Septembre 2025 – Octobre 2026</div>
+            <h3 class="timeline-title">Reconfigurations pour 2027</h3>
+            <p class="timeline-desc">Fin du mandat gouvernemental et recentrage stratégique du parti sur l'autonomie du centre en vue de l'élection présidentielle de 2027.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION RÉSULTATS ÉLECTORAUX & GRAPHIQUES -->
+  <section id="elections" class="section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">03. Données & Visualisations</span>
+        <h2 class="section-title">Résultats Électoraux Historiques</h2>
+        <p class="section-lead">Analyse comparative des performances du MoDem et des listes de coalition associées.</p>
+      </div>
+
+      <div class="chart-container-box">
+        <div class="chart-controls">
+          <div class="filter-btn-group">
+            <button class="filter-btn active" onclick="updateChartData('presidential')">Présidentielles</button>
+            <button class="filter-btn" onclick="updateChartData('european')">Européennes</button>
+          </div>
+          <button class="btn btn-secondary" onclick="exportCSVData()" style="padding: 0.35rem 0.8rem; font-size: 0.8rem;">📥 Exporter en CSV</button>
+        </div>
+
+        <div class="chart-wrapper">
+          <canvas id="electionsChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION PERSONNALITÉS POLITIQUES -->
+  <section id="personnalites" class="section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">04. Acteurs Clés</span>
+        <h2 class="section-title">Principales Personnalités</h2>
+        <p class="section-lead">Portraits des figures marquantes du Mouvement Démocrate.</p>
+      </div>
+
+      <div class="persons-grid">
+        <div class="person-card">
+          <div class="person-img-wrapper">
+            <div class="person-avatar-placeholder">FB</div>
+          </div>
+          <div class="person-info">
+            <h3 class="person-name">François Bayrou</h3>
+            <div class="person-role">Président du MoDem</div>
+            <p class="person-bio">Fondateur du parti, ancien ministre de l'Éducation, maire de Pau et ancien Premier ministre (2024–2025).</p>
+          </div>
+        </div>
+
+        <div class="person-card">
+          <div class="person-img-wrapper">
+            <div class="person-avatar-placeholder">JNB</div>
+          </div>
+          <div class="person-info">
+            <h3 class="person-name">Jean-Noël Barrot</h3>
+            <div class="person-role">Ministre des Affaires Étrangères</div>
+            <p class="person-bio">Économiste de formation, figure montante du centre, engagé sur les questions européennes et internationales.</p>
+          </div>
+        </div>
+
+        <div class="person-card">
+          <div class="person-img-wrapper">
+            <div class="person-avatar-placeholder">MF</div>
+          </div>
+          <div class="person-info">
+            <h3 class="person-name">Marc Fesneau</h3>
+            <div class="person-role">Président du Groupe Députés MoDem</div>
+            <p class="person-bio">Ancien ministre de l'Agriculture, pilier de l'ancrage territorial et parlementaire du mouvement.</p>
+          </div>
+        </div>
+
+        <div class="person-card">
+          <div class="person-img-wrapper">
+            <div class="person-avatar-placeholder">MdS</div>
+          </div>
+          <div class="person-info">
+            <h3 class="person-name">Marielle de Sarnez</h3>
+            <div class="person-role">Figure Historique (1951–2021)</div>
+            <p class="person-bio">Co-fondatrice du MoDem, ancienne ministre européenne et présidente de la Commission des Affaires Étrangères.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION PRÉSIDENTIELLE 2027 -->
+  <section id="presidentielle2027" class="section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">05. Perspectives & Enjeux</span>
+        <h2 class="section-title">2027 : Le Centre face à la Succession</h2>
+        <p class="section-lead">Analyse prospective des options stratégiques du MoDem pour l'échéance présidentielle.</p>
+      </div>
+
+      <div class="scenarios-grid">
+        <div class="scenario-card">
+          <div class="scenario-num">01</div>
+          <h3 class="scenario-title">Candidature Autonome</h3>
+          <p class="card-text">Portée par une figure propre du MoDem afin d'affirmer l'identité centriste originale sans dépendance vis-à-vis des partenaires de la majorité.</p>
+        </div>
+
+        <div class="scenario-card">
+          <div class="scenario-num">02</div>
+          <h3 class="scenario-title">Candidat Commun du Centre</h3>
+          <p class="card-text">Issue d'une primaire ou d'un accord global entre le MoDem, Renaissance et Horizons pour éviter la dispersion au premier tour.</p>
+        </div>
+
+        <div class="scenario-card">
+          <div class="scenario-num">03</div>
+          <h3 class="scenario-title">Soutien Républicain Allié</h3>
+          <p class="card-text">Ralliement négocié à une personnalité d'une formation alliée en échange de garanties programmatiques et de réformes institutionnelles.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION SOURCES & DOCUMENTATION -->
+  <section id="sources" class="section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">06. Transparence & Sources</span>
+        <h2 class="section-title">Bibliothèque de Références</h2>
+        <p class="section-lead">Sources officielles, institutionnelles et académiques vérifiées au 19 octobre 2026.</p>
+      </div>
+
+      <div class="card" style="background: var(--bg-card);">
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 1rem;">
+          <li style="border-bottom: 1px solid var(--border-color-soft); padding-bottom: 0.75rem;">
+            <strong>Ministère de l'Intérieur :</strong> Archives officielles des résultats électoraux (2007-2024).
+          </li>
+          <li style="border-bottom: 1px solid var(--border-color-soft); padding-bottom: 0.75rem;">
+            <strong>Assemblée Nationale :</strong> Fiches et travaux des députés du groupe Les Démocrates.
+          </li>
+          <li>
+            <strong>Mouvement Démocrate :</strong> Statuts officiels, déclarations du Conseil National et communiqués de presse.
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- PIED DE PAGE -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="brand-title" style="margin-bottom: 0.8rem;">Observatoire MoDem</div>
+          <p style="color: var(--text-muted); font-size: 0.85rem;">Une initiative d'analyse politique indépendante et rigoureuse consacrée à l'étude du centrisme en France.</p>
+        </div>
+        <div>
+          <h4 style="color: var(--accent-gold); margin-bottom: 1rem; font-family: var(--font-title);">Navigation</h4>
+          <ul style="list-style: none; font-size: 0.85rem; display: flex; flex-direction: column; gap: 0.4rem;">
+            <li><a href="#apercu">Vue d'ensemble</a></li>
+            <li><a href="#histoire">Histoire</a></li>
+            <li><a href="#elections">Élections</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 style="color: var(--accent-gold); margin-bottom: 1rem; font-family: var(--font-title);">Mentions</h4>
+          <p style="font-size: 0.8rem;">Données vérifiées et mises à jour en Octobre 2026. Application autonome.</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div>&copy; 2026 Observatoire Politique Européen — Tous droits réservés.</div>
+        <div>Développé en HTML5 / CSS3 / JS pur</div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- SCRIPT JAVASCRIPT LOGIQUE ET INTERACTION -->
+  <script>
+    // 1. GESTION DU THÈME SOMBRE / CLAIR
+    function toggleTheme() {
+      const htmlEl = document.documentElement;
+      const currentTheme = htmlEl.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      htmlEl.setAttribute('data-theme', newTheme);
+      document.getElementById('themeToggle').innerText = newTheme === 'dark' ? '🌙' : '☀️';
+    }
+
+    // 2. DONNÉES & GRAPHIQUE ÉLECTORAL (CHART.JS)
+    const electoralData = {
+      presidential: {
+        labels: ['2007 (Bayrou)', '2012 (Bayrou)', '2017 (Macron/Alliance)', '2022 (Macron/Alliance)'],
+        datasets: [{
+          label: 'Score au 1er tour (%)',
+          data: [18.57, 9.13, 24.01, 27.85],
+          backgroundColor: ['#C6A66B', '#788391', '#1D3557', '#E5C992'],
+          borderColor: '#C6A66B',
+          borderWidth: 1
+        }]
+      },
+      european: {
+        labels: ['2009 (MoDem)', '2019 (Renaissance/MoDem)', '2024 (Besoin d\'Europe)'],
+        datasets: [{
+          label: 'Score aux Européennes (%)',
+          data: [8.46, 22.42, 14.60],
+          backgroundColor: ['#788391', '#1D3557', '#C6A66B'],
+          borderColor: '#C6A66B',
+          borderWidth: 1
+        }]
+      }
+    };
+
+    let myChart = null;
+
+    function initChart() {
+      const ctx = document.getElementById('electionsChart').getContext('2d');
+      myChart = new Chart(ctx, {
+        type: 'bar',
+        data: electoralData.presidential,
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { labels: { color: '#F5F1E8', font: { family: 'Plus Jakarta Sans' } } }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { color: '#A0AAB8' },
+              grid: { color: 'rgba(255,255,255,0.05)' }
+            },
+            x: {
+              ticks: { color: '#A0AAB8' },
+              grid: { display: false }
+            }
+          }
+        }
+      });
+    }
+
+    function updateChartData(type) {
+      if (!myChart) return;
+      myChart.data = electoralData[type];
+      myChart.update();
+
+      // Mise à jour de l'état des boutons de filtre
+      document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+
+    // 3. EXPORTATION DES DONNÉES EN CSV
+    function exportCSVData() {
+      let csvContent = "data:text/csv;charset=utf-8,Type,Annee_Ou_Candidat,Score_Pourcentage\n";
+      csvContent += "Presidentielle,2007 (Bayrou),18.57\n";
+      csvContent += "Presidentielle,2012 (Bayrou),9.13\n";
+      csvContent += "Presidentielle,2017 (Alliance Macron),24.01\n";
+      csvContent += "Presidentielle,2022 (Alliance Macron),27.85\n";
+      csvContent += "Europeenne,2009 (MoDem),8.46\n";
+      csvContent += "Europeenne,2019 (Renaissance/MoDem),22.42\n";
+      csvContent += "Europeenne,2024 (Besoin d'Europe),14.60\n";
+
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", "modem_donnees_electorales_2026.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // 4. RECHERCHE SIMPLE DANS LE CONTENU
+    function filterSearch() {
+      const query = document.getElementById('searchInput').value.toLowerCase();
+      const cards = document.querySelectorAll('.card, .person-card, .timeline-content');
+
+      cards.forEach(card => {
+        const text = card.innerText.toLowerCase();
+        if (text.includes(query)) {
+          card.style.display = "";
+        } else if (query.length > 2) {
+          card.style.display = "none";
+        } else {
+          card.style.display = "";
+        }
+      });
+    }
+
+    // Initialisation au chargement de la page
+    window.addEventListener('DOMContentLoaded', () => {
+      initChart();
+    });
+  </script>
+</body>
+</html>
